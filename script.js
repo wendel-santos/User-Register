@@ -9,6 +9,7 @@ const paragraphPasswordFeedback = document.createElement('p')
 const paragraphRepeatPasswordFeedback = document.createElement('p')
 const paragraphSubmitFeedback = document.createElement('p')
 
+paragraphRepeatPasswordFeedback.setAttribute('data-feedback', 'repeat-password-feedback')
 paragraphSubmitFeedback.setAttribute('data-feedback', 'submit-feedback')
 
 const invalidUsernameInfo = {
@@ -26,7 +27,7 @@ const validUsernameInfo = {
 
 const invalidPassword = {
   paragraph: paragraphPasswordFeedback,
-  text: 'The password must contain at least 8 characters, with only numbers, uppercase and/or lowercase letters',
+  text: 'The password must contain at least 10 characters, with only numbers, uppercase and/or lowercase letters',
   className: 'username-help-feedback',
   previousSibling: inputPassword
 }
@@ -71,15 +72,25 @@ const insertParagraphIntoDOM = paragraphInfo => {
 }
 
 const removeSubmitParagraph = () => {
-  const paragraphSubmitFeedbackExists = document.querySelector('[data-feedback="submit-feedback"]')
+  const paragraphSubmitFeedbackExists = 
+    document.querySelector('[data-feedback="submit-feedback"]')
 
   if (paragraphSubmitFeedbackExists) {
     paragraphSubmitFeedbackExists.remove()
   }
 }
 
+const removeRepeatPasswordParagraph = () => {
+  const paragraphRepeatPasswordExists = 
+    document.querySelector('[data-feedback="repeat-password-feedback"]')
+
+  if (paragraphRepeatPasswordExists) {
+    paragraphRepeatPasswordExists.remove()
+  }
+}
+
 const testUsername = inputValue => /^[a-zA-Z0-9]{6,}$/.test(inputValue)
-const testPassword = inputValue => /^[a-zA-Z0-9]{8,}$/.test(inputValue)
+const testPassword = inputValue => /^[a-zA-Z0-9]{10,}$/.test(inputValue)
 
 const showUsernameInfo = e => {
   const isUsernameValid = testUsername(e.target.value)
@@ -98,7 +109,14 @@ const showPasswordInfo = e => {
   const isPasswordValid = testPassword(e.target.value)
   const bothPasswordsAreEqual = inputPassword.value === inputRepeatPassword.value 
 
+  removeRepeatPasswordParagraph()
   removeSubmitParagraph()
+
+  if (bothPasswordsAreEqual) {
+    insertParagraphIntoDOM(validRepeatedPassword)
+  } else {
+    insertParagraphIntoDOM(invalidRepeatedPassword)
+  }
 
   if (!isPasswordValid) {
     insertParagraphIntoDOM(invalidPassword)
@@ -125,10 +143,17 @@ const showSubmitInfo = e => {
   e.preventDefault()
 
   const isUsernameValid = testUsername(inputUsername.value)
-  const repeatPasswordIsValid = inputPassword.value === inputRepeatPassword.value
-  const userAndPasswordIsNotValid = !isUsernameValid || !repeatPasswordIsValid
+  const isPasswordValid = testUsername(inputPassword.value)
+  const repeatPasswordIsValid = inputRepeatPassword.value === inputPassword.value
+  const usernameAndPasswordIsNotValid = !isUsernameValid || !isPasswordValid || !repeatPasswordIsValid
 
-  if (userAndPasswordIsNotValid) {
+  if (repeatPasswordIsValid) {
+    insertParagraphIntoDOM(validSubmitInfo)
+  } else {
+    insertParagraphIntoDOM(invalidRepeatedPassword)
+  }
+
+  if (usernameAndPasswordIsNotValid) {
     insertParagraphIntoDOM(invalidSubmitInfo)
     return 
   }
